@@ -1,16 +1,11 @@
 .App {
-  text-align: center;
-}
-
-.App-logo {
-  height: 40vmin;
-  pointer-events: none;
 }
 
 @media (prefers-reduced-motion: no-preference) {
   .App-logo {
     animation: App-logo-spin infinite 20s linear;
   }
+
 }
 
 .App-header {
@@ -35,4 +30,25 @@
   to {
     transform: rotate(360deg);
   }
+}
+
+.inputBox {
+  width: 350px;
+  padding: 10px;
+  boder-radius: 5px;
+  outline: none;
+  font-size: 1em;
+  position: absolute;
+  top: 50%;
+  left: 40%;
+  margin: -25px 0 0 -25px; 
+  appearance: none;
+	background: rgba(#E91E63, .2);
+	border-radius: .2em .2em 0 0;
+	padding: .4em;
+	color: #40444b;
+}
+
+.title{
+  color: white; 
 }
