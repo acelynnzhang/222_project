@@ -1,3 +1,8 @@
+![image](https://github.com/CS222-UIUC-SP24/group-project-team-25/assets/53002479/4adcef2c-ecb4-4b4b-9d23-b8ae8ad30140)
+![image](https://github.com/CS222-UIUC-SP24/group-project-team-25/assets/53002479/2d2d3e8c-1bee-4f0d-af06-4790e3690bff)
+![image](https://github.com/CS222-UIUC-SP24/group-project-team-25/assets/53002479/f68d6c79-903e-436a-995f-073e83edf858)
+
+
 # Getting Started with Create React App
 
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
