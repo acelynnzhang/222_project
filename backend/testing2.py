@@ -1,5 +1,6 @@
 import requests
 #need id number from here, willgive previewdata
+from summarize import *
 
 Lastname = "Rezk"
 Firstletter= 'C'
@@ -55,3 +56,5 @@ response = requests.post(
     json=json_data,
 )
 print(response.text)
+
+summarize(response.text)
