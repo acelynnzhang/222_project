@@ -1,25 +1,23 @@
 import React, { useState } from 'react';
-import './App.css';
 import './index.css';
+import { BrowserRouter, Route, Routes, Link } from "react-router-dom";
+
+
+import Main from "./components/main.js";
+import Result from "./components/results.js";
+// import CardDetails from "./components/card-detail.js";
 
 function App() {
-  const [inputValue, setInputValue] = useState('');
-
-  const handleInputChange = (event) => {
-    setInputValue(event.target.value);
-  };
-
   return (
-    <div className="App"> 
-      <h1 className="title">Temporary Name</h1>
-      <input
-        className="inputBox"
-        type="text"
-        value={inputValue}
-        onChange={handleInputChange}
-        placeholder="Enter a class name!"
-      />
-    </div>
+    <BrowserRouter>
+      <div className="App"> 
+        <Routes>
+          <Route path="/" element={<Main />} />
+          <Route path="/result" element={<Result />} />
+          {/* <Route path="/card/:id" component={CardDetails} /> */}
+        </Routes>
+      </div>
+    </BrowserRouter>
   );
 }
 
