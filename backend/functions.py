@@ -1,24 +1,24 @@
 import requests
 import xml.etree.ElementTree as ET
 from collections import defaultdict
-from dataclasses import dataclass
+from pydantic.dataclasses import dataclass
 import csv
 from summarize import *
 
 @dataclass
 class Classsection:
-    section: str
-    CRN: int
-    instructor: str
-    enrollmentstatus: str
-    starttime: str
-    endtime: str
-    days: str
-    meetingplace: str
-    ratemyprofid: str
-    ratemyprof: list
-    pastnumstudents: int
-    pastavegpa: int
+    section: str  = "no section"
+    CRN: int = 0
+    instructor: str  = "no instructor"
+    enrollmentstatus: str = "no enrollmentstatus"
+    starttime: str = "no starttime"
+    endtime: str = "no starttime"
+    days: str = "no days"
+    meetingplace: str =  "no meetingplace"
+    ratemyprofid: str =  "no id"
+    ratemyprof: list = "no ratemyprof"
+    pastnumstudents: int = 0
+    pastavegpa: int = 0
 
 
 YEAR = 2024
@@ -122,6 +122,17 @@ def func(boop):
         instructors = meeting.find("instructors")
         #print(meeting.tag, meeting.attrib, meeting.text)
         if not instructors:
+            # roomnum = meeting.find("roomNumber")
+            # if roomnum:
+            #    roomnum = meeting.find("roomNumber").text
+            # else:
+            #     roomnum = "no roomnum"
+            # buildnam = meeting.find("buildingName")
+            # if buildnam:
+            #     buildnam = meeting.find("buildingName").text
+            # else:
+            #     buildnam = "no building name"
+            
             classinfo = Classsection(
                 child.find("sectionNumber").text,
                 child.attrib["id"],
@@ -130,7 +141,7 @@ def func(boop):
                 meeting.find("start").text,
                 meeting.find("end").text,
                 meeting.find("daysOfTheWeek").text,
-                meeting.find("roomNumber").text
+                 meeting.find("roomNumber").text
                 + " "
                 + meeting.find("buildingName").text,
                 'None',[], 0,0
