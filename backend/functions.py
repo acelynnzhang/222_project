@@ -1,24 +1,39 @@
 import requests
 import xml.etree.ElementTree as ET
 from collections import defaultdict
-from pydantic.dataclasses import dataclass
+from dataclasses import dataclass
 import csv
 from summarize import *
 
+# @dataclass
+# class Classsection:
+#     section: str  = "no section"
+#     CRN: int = 0
+#     instructor: str  = "no instructor"
+#     enrollmentstatus: str = "no enrollmentstatus"
+#     starttime: str = "no starttime"
+#     endtime: str = "no starttime"
+#     days: str = "no days"
+#     meetingplace: str =  "no meetingplace"
+#     ratemyprofid: str =  "no id"
+#     ratemyprof: list = "no ratemyprof"
+#     pastnumstudents: int = 0
+#     pastavegpa: int = 0
+
 @dataclass
 class Classsection:
-    section: str  = "no section"
-    CRN: int = 0
-    instructor: str  = "no instructor"
-    enrollmentstatus: str = "no enrollmentstatus"
-    starttime: str = "no starttime"
-    endtime: str = "no starttime"
-    days: str = "no days"
-    meetingplace: str =  "no meetingplace"
-    ratemyprofid: str =  "no id"
-    ratemyprof: list = "no ratemyprof"
-    pastnumstudents: int = 0
-    pastavegpa: int = 0
+    section: str
+    CRN: int 
+    instructor: str 
+    enrollmentstatus: str 
+    starttime: str 
+    endtime: str 
+    days: str 
+    meetingplace: str
+    ratemyprofid: str 
+    ratemyprof: list 
+    pastnumstudents: int 
+    pastavegpa: int 
 
 
 YEAR = 2024
@@ -98,7 +113,7 @@ def basicinfo(lastname, firstletter):
                 ],
             )
 
-    return "None"
+    return "None", "None"
 
 
 def func(boop):
@@ -107,6 +122,7 @@ def func(boop):
     r = requests.get(
         f"http://courses.illinois.edu/cisapp/explorer/schedule/{YEAR}/{SEM}/{classnam[0]}/{classnam[1]}.xml?mode=cascade"
     )
+    print(r.status_code)
     root = ET.fromstring(r.text)
     sections = root.find("detailedSections")
     coursedict = defaultdict(list)
@@ -119,31 +135,45 @@ def func(boop):
 
         if not meeting:
             raise Exception("no meeting")
+        roomnum = meeting.find("roomNumber")
+        if roomnum:
+            roomnum = meeting.find("roomNumber").text
+        else:
+            roomnum = "no roomnum"
+        buildnam = meeting.find("buildingName")
+        if buildnam:
+            buildnam = meeting.find("buildingName").text
+        else:
+            buildnam = "no building name"
+        start = meeting.find("start")
+        if start:
+            start = meeting.find("start").text
+        else:
+            start = "no roomnum"
+        end = meeting.find("end")
+        if end:
+            end = meeting.find("end").text
+        else:
+            end = "no building name"
+        daysOfTheWeek = meeting.find("daysOfTheWeek")
+        if daysOfTheWeek:
+            daysOfTheWeek = meeting.find("daysOfTheWeek").text
+        else:
+            daysOfTheWeek = "no building name"
         instructors = meeting.find("instructors")
         #print(meeting.tag, meeting.attrib, meeting.text)
         if not instructors:
-            # roomnum = meeting.find("roomNumber")
-            # if roomnum:
-            #    roomnum = meeting.find("roomNumber").text
-            # else:
-            #     roomnum = "no roomnum"
-            # buildnam = meeting.find("buildingName")
-            # if buildnam:
-            #     buildnam = meeting.find("buildingName").text
-            # else:
-            #     buildnam = "no building name"
-            
             classinfo = Classsection(
                 child.find("sectionNumber").text,
                 child.attrib["id"],
                 "None",
                 child.find("enrollmentStatus").text,
-                meeting.find("start").text,
-                meeting.find("end").text,
-                meeting.find("daysOfTheWeek").text,
-                 meeting.find("roomNumber").text
+                start,
+                end,
+                daysOfTheWeek,
+                 roomnum
                 + " "
-                + meeting.find("buildingName").text,
+                + buildnam,
                 'None',[], 0,0
             )
             coursedict["None"].append(classinfo)
@@ -157,12 +187,12 @@ def func(boop):
                     child.attrib["id"],
                     instructor.text,
                     child.find("enrollmentStatus").text,
-                    meeting.find("start").text,
-                    meeting.find("end").text,
-                    meeting.find("daysOfTheWeek").text,
-                    meeting.find("roomNumber").text
+                    start,
+                    end,
+                    daysOfTheWeek,
+                    roomnum
                     + " "
-                    + meeting.find("buildingName").text,a,b,c,d
+                    + buildnam,a,b,c,d
                 )
                 coursedict[instructor.text].append(classinfo)
     return coursedict
