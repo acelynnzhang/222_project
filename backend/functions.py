@@ -22,18 +22,18 @@ from summarize import *
 
 @dataclass
 class Classsection:
-    section: str
-    CRN: int 
-    instructor: str 
-    enrollmentstatus: str 
-    starttime: str 
-    endtime: str 
-    days: str 
-    meetingplace: str
-    ratemyprofid: str 
-    ratemyprof: list 
-    pastnumstudents: int 
-    pastavegpa: int 
+    section: str | None
+    CRN: int | None
+    instructor: str  | None
+    enrollmentstatus: str | None
+    starttime: str | None
+    endtime: str | None
+    days: str | None
+    meetingplace: str| None
+    ratemyprofid: str | None
+    ratemyprof: list | None
+    pastnumstudents: int | None
+    pastavegpa: int | None
 
 
 YEAR = 2024
@@ -154,7 +154,7 @@ def func(boop):
         if start:
             start = meeting.find("start").text
         else:
-            start = "no roomnum"
+            start = None
         end = meeting.find("end")
         if end:
             end = meeting.find("end").text
@@ -238,6 +238,8 @@ def fetchprof(id):
         headers=headers,
         json=json_data,
     )
+    if response.status_code != 200:
+        return "not in ratemyprof"
     print("ok")
     return summarize(response.text)
 
