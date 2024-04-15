@@ -63,11 +63,11 @@ with open('./data/gpa.csv', newline='') as csvfile:
 def givestats(instructor,classname):
     a = 0
     b = 0
-    print(classname)
+    #print(classname)
     if instructor in gpadict and classname in gpadict[instructor]:
         b = gpadict[instructor][classname]['sumstudents']
         a = gpadict[instructor][classname]['sumtot']/b
-    print((a,b))
+    #print((a,b))
     return (a,b)
 #retrive basic info from ratemyprof
 def basicinfo(lastname, firstletter):
@@ -123,6 +123,10 @@ def func(boop):
         f"http://courses.illinois.edu/cisapp/explorer/schedule/{YEAR}/{SEM}/{classnam[0]}/{classnam[1]}.xml?mode=cascade"
     )
     print(r.status_code)
+    if r.status_code == 404:
+       return "not offered next sem"
+    if r.status_code != 200:
+        return "other error in course api fetching"
     root = ET.fromstring(r.text)
     sections = root.find("detailedSections")
     coursedict = defaultdict(list)
@@ -135,6 +139,7 @@ def func(boop):
 
         if not meeting:
             raise Exception("no meeting")
+        
         roomnum = meeting.find("roomNumber")
         if roomnum:
             roomnum = meeting.find("roomNumber").text
@@ -160,14 +165,31 @@ def func(boop):
             daysOfTheWeek = meeting.find("daysOfTheWeek").text
         else:
             daysOfTheWeek = "no building name"
+
+        sectionNumber = child.find("sectionNumber")
+        if sectionNumber:
+            sectionNumber = child.find("sectionNumber").text
+        else:
+            sectionNumber = 0
+
+        enrollmentStatus = child.find("enrollmentStatus")
+        if enrollmentStatus:
+            enrollmentStatus = child.find("enrollmentStatus").text
+        else:
+            enrollmentStatus = "N/A"
+
         instructors = meeting.find("instructors")
+        crn = child.attrib["id"]
+        if not crn:
+            crn = 0
+            
         #print(meeting.tag, meeting.attrib, meeting.text)
         if not instructors:
             classinfo = Classsection(
-                child.find("sectionNumber").text,
-                child.attrib["id"],
+                sectionNumber,
+                crn,
                 "None",
-                child.find("enrollmentStatus").text,
+                enrollmentStatus,
                 start,
                 end,
                 daysOfTheWeek,
@@ -183,10 +205,10 @@ def func(boop):
                 a, b = basicinfo(name[0].upper(), name[1].upper())
                 c,d = givestats(instructor.text.replace(',','').upper(), boop)
                 classinfo = Classsection(
-                    child.find("sectionNumber").text,
-                    child.attrib["id"],
+                    sectionNumber,
+                    crn,
                     instructor.text,
-                    child.find("enrollmentStatus").text,
+                    enrollmentStatus,
                     start,
                     end,
                     daysOfTheWeek,
@@ -216,6 +238,6 @@ def fetchprof(id):
         headers=headers,
         json=json_data,
     )
-    print(response.text)
+    print("ok")
     return summarize(response.text)
 

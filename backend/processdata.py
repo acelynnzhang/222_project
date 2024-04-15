@@ -8,4 +8,5 @@ with open('./data/gpa.csv', newline='') as csvfile:
     for row in reader:
         if row['Subject'] and row["Number"]:
             print(row['Subject'], row["Number"])
-            print(functions.func(row['Subject'] + ' ' + row["Number"]))
+            #print(functions.func(row['Subject'] + ' ' + row["Number"]))
+            functions.func(row['Subject'] + ' ' + row["Number"])
