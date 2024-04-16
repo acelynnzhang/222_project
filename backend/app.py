@@ -5,12 +5,13 @@ import functions
 app = Flask(__name__)
 
 profinfo = {}
+sectiontoprof = {}
 
 @app.route('/courselookup/<course>/<number>')
 def lookup(course, number):
     global profinfo
-    profinfo = functions.func(f'{course} {number}')
-    return profinfo
+    sectiontoprof, profinfo = functions.func(f'{course} {number}')
+    return sectiontoprof
 
 
 @app.route('/prof/<proffirst>/<proflast>')

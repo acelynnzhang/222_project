@@ -5,21 +5,6 @@ from dataclasses import dataclass
 import csv
 from summarize import *
 
-# @dataclass
-# class Classsection:
-#     section: str  = "no section"
-#     CRN: int = 0
-#     instructor: str  = "no instructor"
-#     enrollmentstatus: str = "no enrollmentstatus"
-#     starttime: str = "no starttime"
-#     endtime: str = "no starttime"
-#     days: str = "no days"
-#     meetingplace: str =  "no meetingplace"
-#     ratemyprofid: str =  "no id"
-#     ratemyprof: list = "no ratemyprof"
-#     pastnumstudents: int = 0
-#     pastavegpa: int = 0
-
 @dataclass
 class Classsection:
     section: str | None
@@ -35,6 +20,7 @@ class Classsection:
     pastnumstudents: int | None
     pastavegpa: int | None
 
+neededinfo = ["sectionNumber", "CRN", "enrollmentStatus"]
 
 YEAR = 2024
 SEM = "fall"
@@ -89,35 +75,39 @@ def basicinfo(lastname, firstletter):
         "https://www.ratemyprofessors.com/graphql", headers=headers, json=json_data
     )
     # print(response.text)
+    if response.status_code != 200:
+        return "None", "None"
     r = response.json()
     for thing in r["data"]["newSearch"]["teachers"]["edges"]:
         if (
             thing["node"]["lastName"].upper() == lastname
             and thing["node"]["firstName"][0].upper() == firstletter
         ):
-            big = "tot"
+            mandatoryAttendance = None
             currval = 0
             for key in thing["node"]["mandatoryAttendance"]:
                 if (
                     key != "total"
                     and thing["node"]["mandatoryAttendance"][key] > currval
                 ):
-                    big = key
+                    mandatoryAttendance = key
+                    currval = thing["node"]["mandatoryAttendance"][key]
             return (
                 thing["node"]["id"],
                 [
                     thing["node"]["avgRating"],
-                    big,
+                    mandatoryAttendance,
                     thing["node"]["ratingsDistribution"]["total"],
                     thing["node"]["wouldTakeAgainPercentRounded"],
-                ],
+                ]
             )
 
     return "None", "None"
 
 
-def func(boop):
-    classnam = boop.upper()
+def func(classname):
+
+    classnam = classname.upper()
     classnam = classnam.split()  # need courses in CS 222 format
     r = requests.get(
         f"http://courses.illinois.edu/cisapp/explorer/schedule/{YEAR}/{SEM}/{classnam[0]}/{classnam[1]}.xml?mode=cascade"
@@ -130,6 +120,7 @@ def func(boop):
     root = ET.fromstring(r.text)
     sections = root.find("detailedSections")
     coursedict = defaultdict(list)
+    profdict = defaultdict(list)
     for child in sections:
         #print(child.tag, child.attrib, child.text)
         meetings = child.find("meetings")
@@ -140,84 +131,33 @@ def func(boop):
         if not meeting:
             raise Exception("no meeting")
         
-        roomnum = meeting.find("roomNumber")
-        if roomnum:
-            roomnum = meeting.find("roomNumber").text
-        else:
-            roomnum = "no roomnum"
-        buildnam = meeting.find("buildingName")
-        if buildnam:
-            buildnam = meeting.find("buildingName").text
-        else:
-            buildnam = "no building name"
-        start = meeting.find("start")
-        if start:
-            start = meeting.find("start").text
-        else:
-            start = None
-        end = meeting.find("end")
-        if end:
-            end = meeting.find("end").text
-        else:
-            end = "no building name"
-        daysOfTheWeek = meeting.find("daysOfTheWeek")
-        if daysOfTheWeek:
-            daysOfTheWeek = meeting.find("daysOfTheWeek").text
-        else:
-            daysOfTheWeek = "no building name"
+        info = []
 
-        sectionNumber = child.find("sectionNumber")
-        if sectionNumber:
-            sectionNumber = child.find("sectionNumber").text
-        else:
-            sectionNumber = 0
+        for entry in neededinfo:
+            if entry == "CRN":
+                if child.attrib["id"]:
+                    info.append(child.attrib["id"])
+            elif child.find(entry):
+                info.append(child.find(entry).text)
+            else:
+                info.append(None)
 
-        enrollmentStatus = child.find("enrollmentStatus")
-        if enrollmentStatus:
-            enrollmentStatus = child.find("enrollmentStatus").text
-        else:
-            enrollmentStatus = "N/A"
 
         instructors = meeting.find("instructors")
-        crn = child.attrib["id"]
-        if not crn:
-            crn = 0
             
         #print(meeting.tag, meeting.attrib, meeting.text)
         if not instructors:
-            classinfo = Classsection(
-                sectionNumber,
-                crn,
-                "None",
-                enrollmentStatus,
-                start,
-                end,
-                daysOfTheWeek,
-                 roomnum
-                + " "
-                + buildnam,
-                'None',[], 0,0
-            )
-            coursedict["None"].append(classinfo)
+            coursedict["None"].append(info)
         else:
             for instructor in instructors:
-                name = instructor.text.split(", ")
-                a, b = basicinfo(name[0].upper(), name[1].upper())
-                c,d = givestats(instructor.text.replace(',','').upper(), boop)
-                classinfo = Classsection(
-                    sectionNumber,
-                    crn,
-                    instructor.text,
-                    enrollmentStatus,
-                    start,
-                    end,
-                    daysOfTheWeek,
-                    roomnum
-                    + " "
-                    + buildnam,a,b,c,d
-                )
-                coursedict[instructor.text].append(classinfo)
-    return coursedict
+                coursedict[instructor.text].append(info)
+                if instructor.text not in profdict:
+                    name = instructor.text.split(", ")
+                    a,b = basicinfo(name[0].upper(), name[1].upper())
+                    c,d = givestats(instructor.text.replace(',','').upper(), classname)
+                    profdict[instructor.text] = [a,b,c,d]
+    print(coursedict, profdict)
+    return coursedict, profdict
 
 
 def fetchprof(id):
