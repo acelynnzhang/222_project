@@ -131,16 +131,17 @@ def func(classname):
         if not meeting:
             raise Exception("no meeting")
         
+        #info = [child.find("sectionNumber").text, child.attrib["id"], child.find("enrollmentStatus").text]
         info = []
 
         for entry in neededinfo:
             if entry == "CRN":
                 if child.attrib["id"]:
                     info.append(child.attrib["id"])
-            elif child.find(entry):
-                info.append(child.find(entry).text)
-            else:
+            elif not child.find(entry).text:
                 info.append(None)
+            else:
+                info.append(child.find(entry).text)
 
 
         instructors = meeting.find("instructors")

@@ -1,6 +1,8 @@
 from flask import Flask
+from flask import request
 import functions
-
+import sqlite3
+import datetime
 
 app = Flask(__name__)
 
@@ -11,7 +13,14 @@ sectiontoprof = {}
 def lookup(course, number):
     global profinfo
     sectiontoprof, profinfo = functions.func(f'{course} {number}')
-    return sectiontoprof
+    con = sqlite3.connect("database.db")
+    cur = con.cursor()
+    params = (f'{course} {number}',)
+    cur.execute("SELECT * FROM comments WHERE class = ?", params)
+    print(cur.fetchall())
+    comments = cur.fetchall()
+    con.close()
+    return [sectiontoprof, profinfo, comments]
 
 
 @app.route('/prof/<proffirst>/<proflast>')
@@ -22,4 +31,15 @@ def sum(proffirst,proflast):
     prof = f'{proffirst}, {proflast}'
     if prof not in profinfo:
         raise Exception("prof not in info")
-    return functions.fetchprof(profinfo[prof][0].ratemyprofid), 200
+    return functions.fetchprof(profinfo[prof].ratemyprofid)
+
+@app.route('/coursecomments/<course>/<number>', methods=["POST"])
+def postcomment(course, number):
+    con = sqlite3.connect("database.db")
+    cur = con.cursor()
+    cur.execute("""
+    INSERT INTO comments VALUES
+        (, , )
+    """,(f'{course} {number}', request.form["comment"], datetime.today()) )
+    con.commit()
+    con.close()
