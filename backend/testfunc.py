@@ -17,18 +17,18 @@ from datetime import date
 #             functions.func(row['Subject'] + ' ' + row["Number"])
 
 
-def postcomment(course, number):
-    con = sqlite3.connect("database.db")
-    cur = con.cursor()
-    #request.form["comment"]
-    data = (
-    {"course": f'{course} {number}', "comment": "help" ,"time": date.today()}
-    )
-    cur.execute("INSERT INTO comments VALUES(:course,:comment, :time)", data)
-    con.commit()
-    params = (f'{course} {number}',)
-    cur.execute("SELECT * FROM comments WHERE class = ?", params)
-    print(cur.fetchall())
-    con.close()
+# def postcomment(course, number):
+#     con = sqlite3.connect("database.db")
+#     cur = con.cursor()
+#     #request.form["comment"]
+#     data = (
+#     {"course": f'{course} {number}', "comment": "help" ,"time": date.today()}
+#     )
+#     cur.execute("INSERT INTO comments VALUES(:course,:comment, :time)", data)
+#     con.commit()
+#     params = (f'{course} {number}',)
+#     cur.execute("SELECT * FROM comments WHERE class = ?", params)
+#     print(cur.fetchall())
+#     con.close()
 
-postcomment("CS", 255)
+# postcomment("CS", 255)

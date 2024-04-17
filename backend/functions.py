@@ -1,24 +1,9 @@
 import requests
 import xml.etree.ElementTree as ET
 from collections import defaultdict
-from dataclasses import dataclass
-import csv
 from summarize import *
+import sqlite3
 
-@dataclass
-class Classsection:
-    section: str | None
-    CRN: int | None
-    instructor: str  | None
-    enrollmentstatus: str | None
-    starttime: str | None
-    endtime: str | None
-    days: str | None
-    meetingplace: str| None
-    ratemyprofid: str | None
-    ratemyprof: list | None
-    pastnumstudents: int | None
-    pastavegpa: int | None
 
 neededinfo = ["sectionNumber", "CRN", "enrollmentStatus"]
 
@@ -26,35 +11,17 @@ YEAR = 2024
 SEM = "fall"
 
 
-gpadict = {}
-#dictionary of teachers that maps to dictionary of their classes and ave gpa + num students
-
-with open('./data/gpa.csv', newline='') as csvfile:
-    reader = csv.DictReader(csvfile, fieldnames=['Year','Term','YearTerm','Subject','Number','Course Title','Sched Type','A+','A','A-','B+','B','B-','C+','C','C-','D+','D','D-','F','W','Primary Instructor'])
-    for row in reader:
-        if row['Primary Instructor']:
-            name = row['Primary Instructor'].split(', ')
-            name = name[0].strip(',').upper() + ' ' + name[1][0].upper()
-            if name not in gpadict:
-                gpadict[name] ={}
-            totnum = int(row['A+'])+ int(row['A'])+int(row['A-'])+int(row['B+'])+ int(row['B'])+int(row['B-'])+int(row['C+'])+ int(row['C'])+int(row['C-'])+int(row['D+'])+ int(row['D'])+int(row['D-'])+int(row['F'])
-            sumpoints = (int(row['A+']) + int(row['A']))* 4.0 +int(row['A-'])* 3.67+int(row['B+'])*3.33+ int(row['B'])*3+int(row['B-'])*2.67+int(row['C+'])* 2.33+ int(row['C'])*2+int(row['C-']) * 1.67+int(row['D+']) * 1.33+ int(row['D']) *1+int(row['D-'])*0.67 
-            classnum = row['Subject'] + ' ' + row['Number']
-            if classnum  in gpadict[name]:
-                gpadict[name][classnum ]['sumtot'] += sumpoints
-                gpadict[name][classnum ]['sumstudents'] += totnum
-            else:
-                gpadict[name][classnum ] = {'sumtot':sumpoints, 'sumstudents':totnum}
-
 def givestats(instructor,classname):
-    a = 0
-    b = 0
-    #print(classname)
-    if instructor in gpadict and classname in gpadict[instructor]:
-        b = gpadict[instructor][classname]['sumstudents']
-        a = gpadict[instructor][classname]['sumtot']/b
-    #print((a,b))
-    return (a,b)
+    # a = 0
+    # b = 0
+    # print(instructor,classname)
+    con = sqlite3.connect("gpa.db")
+    cur = con.cursor()
+    params = (classname,instructor,)
+    info = cur.execute("SELECT avegpa,pastnumstudents FROM gpa WHERE class = ? AND prof = ?", params).fetchall()
+    #print(info)
+    con.close()
+    return info
 #retrive basic info from ratemyprof
 def basicinfo(lastname, firstletter):
 
@@ -107,6 +74,9 @@ def basicinfo(lastname, firstletter):
 
 def func(classname):
 
+    if classname == "ABE 498":
+        return "nah"
+
     classnam = classname.upper()
     classnam = classnam.split()  # need courses in CS 222 format
     r = requests.get(
@@ -155,8 +125,7 @@ def func(classname):
                 if instructor.text not in profdict:
                     name = instructor.text.split(", ")
                     a,b = basicinfo(name[0].upper(), name[1].upper())
-                    c,d = givestats(instructor.text.replace(',','').upper(), classname)
-                    profdict[instructor.text] = [a,b,c,d]
+                    profdict[instructor.text] = [a,b,givestats(instructor.text.replace(',','').upper(), classname)]
     print(coursedict, profdict)
     return coursedict, profdict
 
@@ -181,6 +150,10 @@ def fetchprof(id):
     )
     if response.status_code != 200:
         return "not in ratemyprof"
+    print(response.text)
+
     print("ok")
     return summarize(response.text)
 
+#givestats("SOLOMON B", "CS 225")
+#fetchprof("VGVhY2hlci0yODczNzI0")

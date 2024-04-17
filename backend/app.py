@@ -2,7 +2,7 @@ from flask import Flask
 from flask import request
 import functions
 import sqlite3
-import datetime
+from datetime import date
 
 app = Flask(__name__)
 
@@ -31,15 +31,17 @@ def sum(proffirst,proflast):
     prof = f'{proffirst}, {proflast}'
     if prof not in profinfo:
         raise Exception("prof not in info")
-    return functions.fetchprof(profinfo[prof].ratemyprofid)
+    return functions.fetchprof(profinfo[prof][0])
 
 @app.route('/coursecomments/<course>/<number>', methods=["POST"])
 def postcomment(course, number):
     con = sqlite3.connect("database.db")
     cur = con.cursor()
-    cur.execute("""
-    INSERT INTO comments VALUES
-        (, , )
-    """,(f'{course} {number}', request.form["comment"], datetime.today()) )
+    comment = request.form["comment"]
+    data = (
+    {"course": f'{course} {number}', "comment": comment ,"time": date.today()}
+    )
+    cur.execute("INSERT INTO comments VALUES(:course,:comment, :time)", data)
     con.commit()
     con.close()
+    return "Ok"
