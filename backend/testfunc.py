@@ -4,6 +4,7 @@ from flask import request
 import functions
 import sqlite3
 from datetime import date
+import requests 
 
 #dictionary of teachers that maps to dictionary of their classes and ave gpa + num students
 
@@ -31,4 +32,16 @@ from datetime import date
 #     print(cur.fetchall())
 #     con.close()
 
+def testapi(course, number):
+    #requests.get(f'http://127.0.0.1:5000/courselookup/{course}/{number}')
+    r = requests.post(f'http://127.0.0.1:5000/coursecomments/{course}/{number}', data= {"comment": "etwt"})
+    print(r.status_code)
+    con = sqlite3.connect("database.db")
+    cur = con.cursor()
+    params = (f'{course} {number}',)
+    cur.execute("SELECT * FROM comments WHERE class = ?", params)
+    print(cur.fetchall())
+    con.close()
+
 # postcomment("CS", 255)
+testapi("CS", "255")

@@ -127,7 +127,7 @@ def func(classname):
                     a,b = basicinfo(name[0].upper(), name[1].upper())
                     profdict[instructor.text] = [a,b,givestats(instructor.text.replace(',','').upper(), classname)]
     print(coursedict, profdict)
-    return coursedict, profdict
+    return (coursedict, profdict)
 
 
 def fetchprof(id):
