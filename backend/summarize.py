@@ -21,15 +21,17 @@ def find_comments(dictionary):
 
 def summarize(json_str): 
     comments = find_comments(json_str)
-
-    '''response = ollama.chat(model='llama2', messages=[
-    {
-        'role': 'user',
-        'content': 'extract all the sentences comes after "comment" in the following message:\n' 
-        + str 
-        + '\n then try to summarize each comments into several keywords followed by a summarized sentence of comment'
-    }
-    ])
-    return response['message']['content']'''
+    summ = ''
+    for i in range(3):
+        comment = comments[i]
+        response = ollama.chat(model='llama3', messages=[
+        {
+            'role': 'user',
+            'content': '''summarize the following comment into three keywords and a sentence following the format: Keywords : Summarized Comment.
+            Just return the answer as the format above and do not add any other information:''' + comment
+        }
+        ])
+        summ += response['message']['content']
+        summ += '\n'
+    return summ
     
-

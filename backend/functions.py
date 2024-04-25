@@ -153,7 +153,7 @@ def fetchprof(id):
     print(response.text)
 
     print("ok")
-    return summarize(response.text)
+    return summarize(response.json())
 
 #givestats("SOLOMON B", "CS 225")
 #fetchprof("VGVhY2hlci0yODczNzI0")
