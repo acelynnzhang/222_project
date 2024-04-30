@@ -11,7 +11,7 @@ neededinfo = ["sectionNumber", "CRN", "enrollmentStatus"]
 YEAR = 2024
 SEM = "fall"
 maptf = {True:1, False: -1, None: 0}
-mapft = {1 : True, 1 :False, 0:None}
+mapft = {1 : True, -1 :False, 0:None}
 uni = rmp.get_school_by_name("University of Illinois Urbana-Champaign")
 
 def info_lookup(instructors,classname):
@@ -130,8 +130,8 @@ def fetchprof(prof, classname):
     for rate in ratings:
         if rate.comment:
             need_summary.append(rate.comment)
-    print(need_summary)
-    # return summarize(need_summary)
+    return (need_summary)
+    #return summarize(need_summary)
 
 #givestats("SOLOMON B", "CS 225")
 #fetchprof("VGVhY2hlci0yODczNzI0")
