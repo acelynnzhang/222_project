@@ -6,12 +6,11 @@ from datetime import date
 
 app = Flask(__name__)
 
-profinfo = {}
-sectiontoprof = {}
 
-@app.route('/courselookup/<course>/<number>')
-def lookup(course, number):
-    global profinfo
+@app.route('/courselookup') #/courselookup?course=nameofcourse&number=num
+def lookup():
+    course = request.args['course']
+    number = request.args['number']
     sectiontoprof, profinfo = functions.func(f'{course} {number}')
     con = sqlite3.connect("database.db")
     cur = con.cursor()
@@ -23,20 +22,19 @@ def lookup(course, number):
     return [sectiontoprof, profinfo, comments]
 
 
-@app.route('/prof/<proffirst>/<proflast>')
-def sum(proffirst,proflast):
-    global profinfo
-    if len(profinfo) < 1:
-        raise Exception("no class given")
-    prof = f'{proffirst}, {proflast}'
-    if prof not in profinfo:
-        raise Exception("prof not in info")
-    return functions.fetchprof(profinfo[prof][0])
+@app.route('/prof', methods=['POST']) 
+def rmp_comments():
+    first_name = request.form["first_name"]
+    last_name = request.form["last_name"]
+    class_name = request.form["class_name"]
+    return functions.fetchprof(f'{last_name} {first_name}', class_name)
 
-@app.route('/coursecomments/<course>/<number>', methods=["POST"])
+@app.route('/coursecomments', methods=["POST"])
 def postcomment(course, number):
     con = sqlite3.connect("database.db")
     cur = con.cursor()
+    course = request.form["course"]
+    number = request.form["number"]
     comment = request.form["comment"]
     data = (
     {"course": f'{course} {number}', "comment": comment ,"time": date.today()}
