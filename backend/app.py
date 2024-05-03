@@ -11,35 +11,24 @@ app = Flask(__name__)
 def lookup():
     course = request.args['course']
     number = request.args['number']
-    sectiontoprof, profinfo = functions.func(f'{course} {number}')
-    con = sqlite3.connect("database.db")
-    cur = con.cursor()
-    params = (f'{course} {number}',)
-    cur.execute("SELECT * FROM comments WHERE class = ?", params)
-    print(cur.fetchall())
-    comments = cur.fetchall()
-    con.close()
-    return [sectiontoprof, profinfo, comments]
+    sectiontoprof, profinfo = functions.class_info(f'{course} {number}')
+    comments = functions.fetch_comments(course, number)
+    if not sectiontoprof:
+        return "Invalid course", 404
+    if not profinfo:
+        return "Profs have no ratemyprofessor pages", 400
+    return [sectiontoprof, profinfo, comments], 200
 
 
 @app.route('/prof', methods=['POST']) 
 def rmp_comments():
-    first_name = request.form["first_name"]
-    last_name = request.form["last_name"]
-    class_name = request.form["class_name"]
-    return functions.fetchprof(f'{last_name} {first_name}', class_name)
+    print(request.form)
+    rmp_summary = functions.fetch_prof(f'{request.json["last_name"]} {request.json["first_name"]}',f'{request.json["course"]} {request.json["number"]}')
+    if not rmp_summary:
+        return "Not in RateMyProfessor", 404
+    return rmp_summary 
 
 @app.route('/coursecomments', methods=["POST"])
-def postcomment(course, number):
-    con = sqlite3.connect("database.db")
-    cur = con.cursor()
-    course = request.form["course"]
-    number = request.form["number"]
-    comment = request.form["comment"]
-    data = (
-    {"course": f'{course} {number}', "comment": comment ,"time": date.today()}
-    )
-    cur.execute("INSERT INTO comments VALUES(:course,:comment, :time)", data)
-    con.commit()
-    con.close()
+def postcomment():
+    functions.add_comment(f'{request.json["course"]}', f'{request.json["number"]}',f'{request.json["comment"]}')
     return "Ok"
