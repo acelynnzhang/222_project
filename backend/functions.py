@@ -29,25 +29,27 @@ def info_lookup(instructors,classname):
         # prof_info['ave_gpa'] = csv_results[0]
         # prof_info['ave_gpa'] = csv_results[1]
         prof_object = rmp.get_professor_by_school_and_name(uni, instructor)
-        ratings = prof_object.get_ratings(classname.replace(' ',''))
-        num_ratings = 0
-        if ratings:
-            data = {
-            'rating': mean([rating.rating for rating in ratings]),
-            'difficulty': mean([rating.difficulty for rating in ratings]),
-            'take_again': mean([rating.take_again for rating in ratings if rating.take_again is not None]),
-            'num_ratings': len(ratings),
-            'attendance_mandatory': mean([rating.attendance_mandatory for rating in ratings if rating.attendance_mandatory is not None]),
-            }
-            prof_info.update(data)
+        print(prof_object)
+        if prof_object:
+            print(prof_object)
+            ratings = prof_object.get_ratings(classname.replace(' ',''))
+            if not ratings:
+                ratings = prof_object.get_ratings(classname.lower().replace(' ','').capitalize())
+                print(classname.lower().replace(' ','').capitalize())
+            num_ratings = 0
+            if ratings:
+                data = {
+                'rating': mean([rating.rating for rating in ratings]),
+                'difficulty': mean([rating.difficulty for rating in ratings]),
+                'take_again': mean([rating.take_again for rating in ratings if rating.take_again is not None]),
+                'num_ratings': len(ratings),
+                'attendance_mandatory': mean([rating.attendance_mandatory for rating in ratings if rating.attendance_mandatory is not None]),
+                }
+                prof_info.update(data)
         prof_dict[instructor] = prof_info
-    #     else:
-    #         rmf_info.append({})
-    # #print(info)
     con.close()
     return prof_dict
 
-#info_lookup(["Sinha H"], "CS 473")
 
 def class_info(classname):
     class_name = classname.upper().split() # need courses in CS 222 format
@@ -113,7 +115,9 @@ def class_info(classname):
 def fetch_prof(prof, classname):
 
     prof_object = rmp.get_professor_by_school_and_name(uni, prof)
-    ratings = prof_object.get_ratings(classname.replace(' ','')) 
+    if classname:
+        classname = classname.replace(' ','')
+    ratings = prof_object.get_ratings(classname)
     if not ratings:
         return None
     need_summary = []
@@ -121,8 +125,7 @@ def fetch_prof(prof, classname):
         if rate.comment:
             need_summary.append(rate.comment)
     print(need_summary)
-    return (need_summary)
-    #return summarize(need_summary)
+    return summarize(need_summary)
 
 # fetch_prof("SOLOMON B", "CS 225")
 #fetchprof("VGVhY2hlci0yODczNzI0")

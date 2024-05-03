@@ -16,7 +16,7 @@ def lookup():
     if not sectiontoprof:
         return "Invalid course", 404
     if not profinfo:
-        return "Other error in course API", 400
+        return "Profs have no ratemyprofessor pages", 400
     return [sectiontoprof, profinfo, comments], 200
 
 
