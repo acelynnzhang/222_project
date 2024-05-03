@@ -4,14 +4,13 @@ from collections import defaultdict
 from summarize import *
 import sqlite3
 import ratemyprofessor as rmp
-import numpy as np
+from statistics import mean
+from datetime import date
 
 neededinfo = ["sectionNumber", "CRN", "enrollmentStatus"]
 
 YEAR = 2024
 SEM = "fall"
-maptf = {True:1, False: -1, None: 0}
-mapft = {1 : True, -1 :False, 0:None}
 uni = rmp.get_school_by_name("University of Illinois Urbana-Champaign")
 
 def info_lookup(instructors,classname):
@@ -31,26 +30,16 @@ def info_lookup(instructors,classname):
         # prof_info['ave_gpa'] = csv_results[1]
         prof_object = rmp.get_professor_by_school_and_name(uni, instructor)
         ratings = prof_object.get_ratings(classname.replace(' ',''))
-        rmp_nums = np.zeros(4)
         num_ratings = 0
-        for rate in ratings:
-
-            arr = np.array([rate.rating, rate.difficulty, rate.take_again,maptf[rate.attendance_mandatory]])
-            arr[arr == None] = 0
-            print(arr)
-            num_ratings+=1
-            rmp_nums = rmp_nums + arr
-
-
-        # if info:
-        data = {
-        'rating': rmp_nums[0]/num_ratings,
-        'difficulty': rmp_nums[1]/num_ratings,
-        'take_again': rmp_nums[2]/num_ratings,
-        'num_ratings': num_ratings,
-        'attendance_mandatory': mapft[round(rmp_nums[3]/num_ratings)],
-        }
-        prof_info.update(data)
+        if ratings:
+            data = {
+            'rating': mean([rating.rating for rating in ratings]),
+            'difficulty': mean([rating.difficulty for rating in ratings]),
+            'take_again': mean([rating.take_again for rating in ratings if rating.take_again is not None]),
+            'num_ratings': len(ratings),
+            'attendance_mandatory': mean([rating.attendance_mandatory for rating in ratings if rating.attendance_mandatory is not None]),
+            }
+            prof_info.update(data)
         prof_dict[instructor] = prof_info
     #     else:
     #         rmf_info.append({})
@@ -58,21 +47,22 @@ def info_lookup(instructors,classname):
     con.close()
     return prof_dict
 
+#info_lookup(["Sinha H"], "CS 473")
 
-def func(classname):
+def class_info(classname):
+    class_name = classname.upper().split() # need courses in CS 222 format
 
-    if classname == "ABE 498":
+    if class_name[1] == "498":
         return "Unsupported class"
 
-    class_name = classname.upper().split() # need courses in CS 222 format
     r = requests.get(
         f"http://courses.illinois.edu/cisapp/explorer/schedule/{YEAR}/{SEM}/{class_name[0]}/{class_name[1]}.xml?mode=cascade"
     )
     print(r.status_code)
     if r.status_code == 404:
-       return "not offered next sem"
+       return None, None
     if r.status_code != 200:
-        return "other error in course api fetching"
+        return "Other error in course API", None
     
     coursedict = defaultdict(list)
     profdict = defaultdict(list)
@@ -85,11 +75,11 @@ def func(classname):
         #print(child.tag, child.attrib, child.text)
         meetings = child.find("meetings")
         if not meetings:
-            raise Exception("no meetings")
+            return "Other error in course API", None
         meeting = meetings.find("meeting")
 
         if not meeting:
-            raise Exception("no meeting")
+            return "Other error in course API", None
         
         #info = [child.find("sectionNumber").text, child.attrib["id"], child.find("enrollmentStatus").text]
         info = []
@@ -120,18 +110,41 @@ def func(classname):
     return (coursedict, prof_info)
 
 
-def fetchprof(prof, classname):
+def fetch_prof(prof, classname):
 
     prof_object = rmp.get_professor_by_school_and_name(uni, prof)
     ratings = prof_object.get_ratings(classname.replace(' ','')) 
     if not ratings:
-        return "not in ratemyprof"
+        return None
     need_summary = []
     for rate in ratings:
         if rate.comment:
             need_summary.append(rate.comment)
+    print(need_summary)
     return (need_summary)
     #return summarize(need_summary)
 
-#givestats("SOLOMON B", "CS 225")
+# fetch_prof("SOLOMON B", "CS 225")
 #fetchprof("VGVhY2hlci0yODczNzI0")
+
+def add_comment(course, number, comment):
+    con = sqlite3.connect("database.db")
+    cur = con.cursor()
+    data = (
+    {"course": f'{course} {number}', "comment": comment ,"time": date.today()}
+    )
+    cur.execute("INSERT INTO comments VALUES(:course,:comment, :time)", data)
+    con.commit()
+    con.close()
+
+
+def fetch_comments(course, number):
+    con = sqlite3.connect("database.db")
+    cur = con.cursor()
+    params = (f'{course} {number}',)
+    cur.execute("SELECT comment,dateposted FROM comments WHERE class = ?", params)
+    comments = cur.fetchall()
+    print(comments)
+    con.close()
+    return comments
+
