@@ -23,7 +23,7 @@ def lookup():
 @app.route('/prof', methods=['POST']) 
 def rmp_comments():
     print(request.form)
-    rmp_summary = functions.fetch_prof(f'{request.json["last_name"]} {request.json["first_name"]}',f'{request.json["course"]} {request.json["number"]}')
+    rmp_summary = functions.fetch_prof(f'{request.json["name"]}',f'{request.json["course"]} {request.json["number"]}')
     if not rmp_summary:
         return "Not in RateMyProfessor", 404
     return rmp_summary 
