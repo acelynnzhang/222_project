@@ -2,6 +2,29 @@
 ![image](https://github.com/CS222-UIUC-SP24/group-project-team-25/assets/53002479/2d2d3e8c-1bee-4f0d-af06-4790e3690bff)
 ![image](https://github.com/CS222-UIUC-SP24/group-project-team-25/assets/53002479/f68d6c79-903e-436a-995f-073e83edf858)
 
+# To run the project:
+1. Run the front-end
+```
+$ cd my-app
+npm start
+```
+2. Run the backend
+
+```
+$ cd backend
+python3 -m flask run
+```
+
+3. Start Ollama
+   
+```
+$ ollama run llama3
+```
+- download package [here](https://ollama.com/)
+
+
+
+
 
 # Getting Started with Create React App
 
