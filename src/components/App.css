@@ -34,20 +34,31 @@
 }
 
 .inputBox {
-  width: 350px;
+  width: 150px;
   padding: 10px;
-  boder-radius: 5px;
+  /* boder-radius: 5px; */
   outline: none;
   font-size: 1em;
-  position: absolute;
+  /* position: absolute; */
   top: 50%;
   left: 40%;
-  margin: -25px 0 0 -25px; 
-  appearance: none;
-	background: rgba(#E91E63, .2);
-	border-radius: .2em .2em 0 0;
-	padding: .4em;
+  /* margin: -25px 0 0 -25px; 
+  appearance: none; */ 
+	/* background: rgba(#E91E63, .2); */
+	/* border-radius: .2em .2em 0 0; */
+	/* padding: .4em;
 	color: #40444b;
+  /* display: inline-block; */
+  /* vertical-align: text-top; */
+  /* margin: 0 auto; */
+  flex: 1; /* Distribute available space evenly between the two text fields */
+  margin-right: 10px; /* Adjust this value for spacing between the text fields */
+
+}
+
+.inputContainer{
+  display: flex;
+  align-items: center;
 }
 
 .title{
@@ -90,4 +101,26 @@
 .card-content {
   padding: 16px;
   color:#ddd;
+}
+
+.card{
+  margin: auto;
+  /* width: 50%; */
+  border: 3px solid white;
+  padding: 10px;
+  background-color: gray;
+  margin-bottom: 10px;
+}
+
+.search-button{
+  position: absolute; 
+  width:5%;
+  height:5%;
+  border-radius: 10px;
+  top: 25%;
+  left: 45%;
+}
+
+.card-text{
+  color:white;
 }
