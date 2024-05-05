@@ -1,31 +1,49 @@
-import React, { useState } from 'react';
-import './App.css';
+import React, { useState } from "react";
+import "./App.css";
 import { Link } from "react-router-dom";
+import axios from "axios";
+import { useNavigate } from "react-router-dom";
 
 const Main = () => {
-    const [inputValue, setInputValue] = useState('');
+	const [courseName, setCourseName] = useState("");
+	const [courseNumber, setCourseNumber] = useState("");
+	const navigate = useNavigate();
 
-    const handleInputChange = (event) => {
-      setInputValue(event.target.value);
-    };
+	const handleCourseNameChange = (event) => {
+		setCourseName(event.target.value);
+	};
 
-    return (
-        <div>
-            <h1 className="title">Temporary Name</h1>
-            <input
-                className="inputBox"
-                type="text"
-                value={inputValue}
-                onChange={handleInputChange}
-                placeholder="Enter a class name!"
-            />
-            <Link
-                className='link-main-page'
-                to="/result">
-                Search
-            </Link>
-        </div>
-    );
+	const handleCourseNumberChange = (event) => {
+		setCourseNumber(event.target.value);
+	};
+
+	const handleSearch = () => {
+		const data = { name: courseName, number: courseNumber };
+		navigate("/result", { state: data });
+	};
+
+	return (
+		<div>
+			<h1 className="title">CourseComparator</h1>
+			<div className="inputContainer">
+				<input
+					className="inputBox"
+					type="text"
+					value={courseName}
+					onChange={handleCourseNameChange}
+					placeholder="Course Name"
+				/>
+				<input
+					className="inputBox"
+					type="text"
+					value={courseNumber}
+					onChange={handleCourseNumberChange}
+					placeholder="Course Number"
+				/>
+			</div>
+			<button className="search-button" onClick={handleSearch}>Search</button>
+		</div>
+	);
 };
- 
+
 export default Main;
