@@ -1,4 +1,4 @@
-# Introduction
+# CourseComparator
 
 ## What does our project do?
 
