@@ -2,13 +2,15 @@
 
 ## What does our project do?
 
-Users can type in a class course and be returned a list of instructors with stats and a summarization of the reviews. 
-Users will have the option to view the full rate my professor ratings 
-Users can type in a course subject and be returned the highest rated courses
+Users can type in a class course and be returned a list of instructors with stats.
+Users can click to learn more about a particular professor, and be returned a short summary of reviews from RateMyProfessor.
+Users can post comments on certain classes as well as view past comments
+
 
 ## What is our motivation?
 
-Although the class might be the same in title, the actual experience of the class is heavily dictated by the specific instructor. Our project aims to smoothen the process of picking a section by combining the information from rate my professor and the stats on gpa regarding the instructors of a course.
+Although the class might be the same in title, the actual experience of the class is heavily dictated by the specific instructor. Our project aims to smoothen the process of picking a section by combining the information from rate my professor and regarding the instructors of a course  and provide a platform for students to communicate.
+
 
 
 # Technical Architecture
